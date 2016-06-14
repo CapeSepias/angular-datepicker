@@ -1,6 +1,4 @@
-/* global moment */
 'use strict';
-
 var Module = angular.module('datePicker', []);
 
 Module.constant('datePickerConfig', {
@@ -76,8 +74,14 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         now = scope.now = createMoment(),
         selected = scope.date = createMoment(scope.model || now),
         autoclose = attrs.autoClose === 'true',
-        // Either gets the 1st day from the attributes, or asks moment.js to give it to us as it is localized.
-        firstDay = attrs.firstDay && attrs.firstDay >= 0 && attrs.firstDay <= 6 ? parseInt(attrs.firstDay, 10) : moment().weekday(0).day();
+      // Either gets the 1st day from the attributes, or asks moment.js to give it to us as it is localized.
+        firstDay = attrs.firstDay && attrs.firstDay >= 0 && attrs.firstDay <= 6 ? parseInt(attrs.firstDay, 10) : moment().weekday(0).day(),
+        setDate,
+        prepareViewData,
+        isSame,
+        clipDate,
+        isNow,
+        inValidRange;
 
       datePickerUtils.setParams(tz, firstDay);
 
@@ -126,7 +130,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         }
       };
 
-      function setDate(date) {
+      setDate = function (date) {
         if (date) {
           scope.model = date;
           if (ngModel) {
@@ -139,7 +143,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (scope.callbackOnSetDate) {
           scope.callbackOnSetDate(attrs.datePicker, scope.date);
         }
-      }
+      };
 
       function update() {
         var view = scope.view;
@@ -190,7 +194,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         });
       }
 
-      function prepareViewData() {
+      prepareViewData = function () {
         var view = scope.view,
           date = scope.date,
           classes = [], classList = '',
@@ -220,8 +224,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           }
         } else {
           var params = datePickerConfig.viewConfig[view],
-              dates = scope[params[0]],
-              compareFunc = params[1];
+            dates = scope[params[0]],
+            compareFunc = params[1];
 
           for (i = 0; i < dates.length; i++) {
             classList = '';
@@ -238,14 +242,14 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           }
         }
         scope.classes = classes;
-      }
+      };
 
       scope.next = function (delta) {
         var date = moment(scope.date);
         delta = delta || 1;
         switch (scope.view) {
           case 'year':
-            /*falls through*/
+          /*falls through*/
           case 'month':
             date.year(date.year() + delta);
             break;
@@ -253,7 +257,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
             date.month(date.month() + delta);
             break;
           case 'hours':
-            /*falls through*/
+          /*falls through*/
           case 'minutes':
             date.hours(date.hours() + delta);
             break;
@@ -267,7 +271,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         }
       };
 
-      function inValidRange(date) {
+      inValidRange = function (date) {
         var valid = true;
         if (minDate && minDate.isAfter(date)) {
           valid = isSame(minDate, date);
@@ -276,13 +280,13 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           valid &= isSame(maxDate, date);
         }
         return valid;
-      }
+      };
 
-      function isSame(date1, date2) {
+      isSame = function (date1, date2) {
         return date1.isSame(date2, datePickerConfig.momentNames[scope.view]) ? true : false;
-      }
+      };
 
-      function clipDate(date) {
+      clipDate = function (date) {
         if (minDate && minDate.isAfter(date)) {
           return minDate;
         } else if (maxDate && maxDate.isBefore(date)) {
@@ -290,29 +294,29 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         } else {
           return date;
         }
-      }
+      };
 
-      function isNow(date, view) {
+      isNow = function (date, view) {
         var is = true;
 
         switch (view) {
           case 'minutes':
             is &= ~~(now.minutes() / step) === ~~(date.minutes() / step);
-            /* falls through */
+          /* falls through */
           case 'hours':
             is &= now.hours() === date.hours();
-            /* falls through */
+          /* falls through */
           case 'date':
             is &= now.date() === date.date();
-            /* falls through */
+          /* falls through */
           case 'month':
             is &= now.month() === date.month();
-            /* falls through */
+          /* falls through */
           case 'year':
             is &= now.year() === date.year();
         }
         return is;
-      }
+      };
 
       scope.prev = function (delta) {
         return scope.next(-delta || -1);
