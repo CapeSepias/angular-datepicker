@@ -504,7 +504,7 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
 angular.module("datePicker").run(["$templateCache", function($templateCache) {
 
   $templateCache.put("templates/datepicker.html",
-    "<div ng-switch=\"view\">\n" +
+    "<div ng-switch=\"view\" data-current-view=\"{{view}}\">\n" +
     "  <div ng-switch-when=\"date\">\n" +
     "    <table>\n" +
     "      <thead>\n" +
