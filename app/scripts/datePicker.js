@@ -217,7 +217,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
              date.setDate(0);
              }
              */
-            date.setMonth(date.getMonth() + delta);
+            var days = new Date(date.getYear(), date.getMonth() + delta + 1, 0).getDate();
+            date.setMonth(date.getMonth() + delta, days);
             break;
           case 'hours':
           /*falls through*/
